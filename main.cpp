@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <graphics.h>
 #include <conio.h>
+#include  <vector>
 #include "tools.h"
+
+using namespace std;
 
 #define WIN_WIDTH 1012
 #define WIN_HEIGHT 396
@@ -24,6 +27,23 @@ int tortoiseX;
 int tortoiseY;
 bool startUpdate;
 bool isTortoise;
+
+typedef enum {
+	TORTOISE,
+	LION,
+	OBSTACLE_COUNT
+} obstacle_type;
+
+vector<vector<IMAGE>> obstacleImages;
+
+typedef struct obstacle {
+	obstacle_type type;
+	int imgIndex;
+	int x, y;
+	int speed;
+	int power;
+	bool exist;
+} obstacle_t;
 
 void init() {
 	initgraph(WIN_WIDTH, WIN_HEIGHT);
