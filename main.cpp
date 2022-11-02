@@ -9,24 +9,25 @@ using namespace std;
 #define WIN_WIDTH 1012
 #define WIN_HEIGHT 396
 #define HERO_JUMP_SPEED	8
+#define OBSTACLES_COUNT 10
 
 IMAGE image_bg[3];
 IMAGE image_hero[12];
-IMAGE tortoise[7];
+//IMAGE tortoise[7];
 int bgX[3];			
 int bgSpeed[3] = { 1,2,4 };
 int heroX;
 int heroY;
 int heroYInit;
 int heroIndex;
-int tortoiseIndex;
+//int tortoiseIndex;
 int heroJumpMax;
 int heroJumpFlag;
 int jumpOffset;
-int tortoiseX;
-int tortoiseY;
+//int tortoiseX;
+//int tortoiseY;
 bool startUpdate;
-bool isTortoise;
+//bool isTortoise;
 
 typedef enum {
 	TORTOISE,
@@ -45,9 +46,14 @@ typedef struct obstacle {
 	bool exist;
 } obstacle_t;
 
+obstacle_t obstacles[OBSTACLES_COUNT];
 void init() {
 	initgraph(WIN_WIDTH, WIN_HEIGHT);
 	char name[64];
+	IMAGE imgType;
+	IMAGE imgLion;
+	vector<IMAGE> imgTorArray;
+	vector<IMAGE> imgLionArray;
 	for (int i = 0; i < 12; i++)
 	{
 		if (i < 3) {
@@ -56,12 +62,24 @@ void init() {
 			loadimage(&image_bg[i], name);
 			bgX[i] = 0;
 		}
+		if (i < 6) {
+			sprintf(name, "material/res/res/p%d.png", i + 1);
+			loadimage(&imgType, name);
+			imgLionArray.push_back(imgType);
+		}
 		if (i < 7) {
 			sprintf(name, "material/res/res/t%d.png", i + 1);
-			loadimage(&tortoise[i], name);
+			loadimage(&imgType, name);
+			imgTorArray.push_back(imgType);
 		}
 		sprintf(name, "material/res/res/hero%d.png", i + 1);
 		loadimage(&image_hero[i], name);
+	}
+	obstacleImages.push_back(imgTorArray);
+	obstacleImages.push_back(imgLionArray);
+	for (int i = 0; i < OBSTACLES_COUNT; i++)
+	{
+		obstacles[i].exist = false;
 	}
 	heroX = WIN_WIDTH / 2 - image_hero[0].getwidth() / 2;
 	heroYInit = heroY = 345 - image_hero[0].getheight();
@@ -121,9 +139,9 @@ void updateBg() {
 }
 
 void updateEnemy() {
-	if (isTortoise) {
+	/*if (isTortoise) {
 		putimagePNG2(tortoiseX, tortoiseY, WIN_WIDTH, &tortoise[tortoiseIndex]);
-	}
+	}*/
 }
 
 void keyBoard() {
