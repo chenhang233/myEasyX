@@ -1,5 +1,1 @@
-﻿  main.cpp
-C:\Users\chenhang\Desktop\code\03.C\myEasyX\main.cpp(34,4): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\chenhang\Desktop\code\03.C\myEasyX\main.cpp(40,4): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-C:\Users\chenhang\Desktop\code\03.C\myEasyX\main.cpp(43,3): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-  myEasyX.vcxproj -> C:\Users\chenhang\Desktop\code\03.C\myEasyX\x64\Debug\myEasyX.exe
+﻿  myEasyX.vcxproj -> C:\Users\chenhang\Desktop\code\03.C\myEasyX\x64\Debug\myEasyX.exe

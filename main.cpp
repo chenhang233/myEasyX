@@ -13,21 +13,17 @@ using namespace std;
 
 IMAGE image_bg[3];
 IMAGE image_hero[12];
-//IMAGE tortoise[7];
+
 int bgX[3];			
 int bgSpeed[3] = { 1,2,4 };
 int heroX;
 int heroY;
 int heroYInit;
 int heroIndex;
-//int tortoiseIndex;
 int heroJumpMax;
 int heroJumpFlag;
 int jumpOffset;
-//int tortoiseX;
-//int tortoiseY;
 bool startUpdate;
-//bool isTortoise;
 
 typedef enum {
 	TORTOISE,
@@ -36,6 +32,8 @@ typedef enum {
 } obstacle_type;
 
 vector<vector<IMAGE>> obstacleImages;
+IMAGE imgHeroDown[2];
+bool heroDownFlag;
 
 typedef struct obstacle {
 	obstacle_type type;
@@ -50,12 +48,16 @@ obstacle_t obstacles[OBSTACLES_COUNT];
 void init() {
 	initgraph(WIN_WIDTH, WIN_HEIGHT);
 	char name[64];
-	IMAGE imgType;
-	IMAGE imgLion;
+	IMAGE imgType1;
+	IMAGE imgType2;
 	vector<IMAGE> imgTorArray;
 	vector<IMAGE> imgLionArray;
 	for (int i = 0; i < 12; i++)
 	{
+		if (i < 2) {
+			sprintf(name, "material/res/res/d%d.png", i + 1);
+			loadimage(&imgHeroDown[i], name);
+		}
 		if (i < 3) {
 			sprintf(name, "material/res/res/bg%03d.png", i + 1);
 			// material/res/res/bg001.png
@@ -64,13 +66,13 @@ void init() {
 		}
 		if (i < 6) {
 			sprintf(name, "material/res/res/p%d.png", i + 1);
-			loadimage(&imgType, name);
-			imgLionArray.push_back(imgType);
+			loadimage(&imgType1, name);
+			imgLionArray.push_back(imgType1);
 		}
 		if (i < 7) {
 			sprintf(name, "material/res/res/t%d.png", i + 1);
-			loadimage(&imgType, name);
-			imgTorArray.push_back(imgType);
+			loadimage(&imgType2, name);
+			imgTorArray.push_back(imgType2);
 		}
 		sprintf(name, "material/res/res/hero%d.png", i + 1);
 		loadimage(&image_hero[i], name);
@@ -85,15 +87,34 @@ void init() {
 	heroYInit = heroY = 345 - image_hero[0].getheight();
 	heroIndex = 0;
 	heroJumpFlag = false;
+	heroDownFlag = false;
 	jumpOffset = -HERO_JUMP_SPEED;
 	heroJumpMax = heroYInit - 120;
 	startUpdate = true;
-	isTortoise = false;
-	tortoiseY = 345 - tortoise[0].getheight() + 5;
-	tortoiseIndex = 0;
 }
 
-void fly() {
+void createObstacles() {
+	int i;
+	for (i = 0; i < OBSTACLES_COUNT; i++) {
+		if (!obstacles[i].exist) break;
+	}
+	if (i >= OBSTACLES_COUNT) return;
+	obstacles[i].exist = true;
+	obstacles[i].imgIndex = 0;
+	obstacles[i].x = WIN_WIDTH;
+	obstacles[i].type = (obstacle_type)(rand() % OBSTACLE_COUNT);
+	obstacles[i].y = 345 + 5 - obstacleImages[obstacles[i].type][0].getheight();
+	if (obstacles[i].type == TORTOISE) {
+		obstacles[i].speed = 0;
+		obstacles[i].power = 5;
+	}
+	else if (obstacles[i].type == LION) {
+		obstacles[i].speed = 5;
+		obstacles[i].power = 20;
+	}
+}
+
+void todo() {
 	for (int i = 0; i < 3; i++)
 	{
 		if (bgX[i] <= -WIN_WIDTH) 
@@ -110,26 +131,28 @@ void fly() {
 			jumpOffset = -HERO_JUMP_SPEED;
 		}
 	}
-	else {
+	else if (heroDownFlag) {
+		static int count = 0;
+		int delays[2] = { 4,10 };
+		count++;
+		if (count >= delays[heroIndex]) {
+			count = 0;
+			heroIndex++;
+			if (heroIndex >= 2) {
+				heroDownFlag = false;
+				heroIndex = 0;
+			}
+		}
+	} else {
 		heroIndex = (heroIndex + 1) % 12;
 	}
 	static int frameCount = 0;
-	static int frame_tor = 100;
+	static int frame_enemy = 50;
 	frameCount++;
-	if (frameCount > frame_tor) {
+	if (frameCount > frame_enemy) {
 		frameCount = 0;
-		if (!isTortoise) {
-			isTortoise = true;
-			tortoiseX = WIN_WIDTH;
-			frame_tor = 200 + rand() % 300;
-		}
-	}
-	if (isTortoise) {
-		tortoiseX -= bgSpeed[2];
-		tortoiseIndex = (tortoiseIndex + 1) % 7;
-		if (tortoiseX < -tortoise[0].getwidth()) {
-			isTortoise = false;
-		}
+		frame_enemy = 50 + rand() % 50;
+		createObstacles();
 	}
 }
 void updateBg() {
@@ -139,9 +162,29 @@ void updateBg() {
 }
 
 void updateEnemy() {
-	/*if (isTortoise) {
-		putimagePNG2(tortoiseX, tortoiseY, WIN_WIDTH, &tortoise[tortoiseIndex]);
-	}*/
+	for (int i = 0; i < OBSTACLES_COUNT; i++) {
+		if (obstacles[i].exist) {
+			putimagePNG2(obstacles[i].x, obstacles[i].y, WIN_WIDTH,&obstacleImages[obstacles[i].type][obstacles[i].imgIndex]);
+			obstacles[i].x -= obstacles[i].speed + bgSpeed[2];
+			if (obstacles[i].x <= -obstacleImages[obstacles[i].type][0].getwidth() * 2) {
+			obstacles[i].exist = false;
+			}
+			int len = (int)obstacleImages[obstacles[i].type].size();
+			obstacles[i].imgIndex = (obstacles[i].imgIndex + 1) % len;
+		}
+	}
+
+}
+
+void jump() {
+	heroJumpFlag = true;
+	startUpdate = true;
+}
+
+void down() {
+	heroDownFlag = true;
+	startUpdate = true;
+	heroIndex = 0;
 }
 
 void keyBoard() {
@@ -150,10 +193,24 @@ void keyBoard() {
 		c = _getch();
 		if (c == ' ')
 		{
-			heroJumpFlag = true;
-			startUpdate = true;
+			jump();
+		}
+		else if (c == 'z')
+		{
+			down();
 		}
 	 }
+}
+
+void updateHero() {
+	if (!heroDownFlag) {
+		putimagePNG2(heroX, heroY, &image_hero[heroIndex]);
+	}
+	else {
+		int y = 345 - imgHeroDown[heroIndex].getheight();
+		putimagePNG2(heroX, y, &imgHeroDown[heroIndex]);
+	}
+
 }
 int main()
 {
@@ -173,10 +230,10 @@ int main()
 			// 更新背景
 			BeginBatchDraw();// 让 putimagePNG2不一条条打印,而是先缓存好所以片段,再打印,解决闪烁问题
 			updateBg();
-			putimagePNG2(heroX, heroY, &image_hero[heroIndex]);
+			updateHero();
 			updateEnemy();
 			EndBatchDraw();
-			fly();
+			todo();
 		}
 
 	}
