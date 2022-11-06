@@ -1,1 +1,3 @@
-﻿  myEasyX.vcxproj -> C:\Users\chenhang\Desktop\code\03.C\myEasyX\x64\Debug\myEasyX.exe
+﻿  main.cpp
+C:\Users\chenhang\Desktop\code\03.C\myEasyX\main.cpp(279,65): warning C4244: “参数”: 从“double”转换到“float”，可能丢失数据
+  myEasyX.vcxproj -> C:\Users\chenhang\Desktop\code\03.C\myEasyX\x64\Debug\myEasyX.exe
